@@ -1,4 +1,4 @@
-#! /bin/bash -ex
+#! /bin/bash -x
 
 # openssh
 apt install -y openssh-server
