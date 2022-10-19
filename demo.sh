@@ -29,26 +29,26 @@ sed -i "s/TARGET-IP/${IP}/" healthcheck.robot
 
 # step 1 deploy Kubernetes cluster and obtain the Kube config
 # remove the old one if it's already there
-if [ -d kubespray ]
+if [ -d kubeadm ]
 then
-	rm -rf kubespray
+	rm -rf kubeadm
 fi
-git clone https://github.com/pekwatch746/kubespray.git
-cd kubespray
+git clone https://github.com/pekwatch746/kubeadm.git
+cd kubeadm
 TMPFILE=/tmp/tmp`date +%s`
 cat sample_env | sed -e '/ANSIBLE_HOST_IP/d' > $TMPFILE
 echo "ANSIBLE_HOST_IP=${IP}" > sample_env
 cat $TMPFILE >> sample_env
 
 # copy the private key to the inventory/sample folder as id_rsa
-cp $KEYFILE inventory/sample/id_rsa
-chmod 400 inventory/sample/id_rsa
+cp $KEYFILE id_rsa
+chmod 400 id_rsa
 
 # build the Docker image
-docker build -t kubespray .
+docker build -t kubeadm .
 
 # run the docker container to deploy Kubernetes onto the SUT specified by the IP address
-docker run -v ~/.kube:/kubespray/config kubespray 
+docker run -v ~/.kube:/kubeadm/config kubeadm 
 
 cd $WORKDIR
 # step 2 complete the deployment based on the Kube config from step 1
@@ -60,9 +60,9 @@ fi
 
 git clone https://github.com/pekwatch746/richelm.git
 
-cd richelm && export REBUILD=true && ./build.sh
+cd richelm && ./build.sh static
 
-docker run -ti --rm -w /apps -v ~/.kube:/root/.kube -t alpine/k8s:1.23.7
+sudo docker run -ti --rm -w /apps -v ~/.kube:/root/.kube -t richelmlegacy:1.19.16 
 
 # sometimes some RIC platform containers are not up right away so wait a bit
 sleep 60	
